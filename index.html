@@ -3,213 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AC Info Database</title>
+    <title>Anti-Cheat Database</title>
     <style>
         :root {
-            --bg-color: #1e1e2e;
-            --card-bg: #2b2b3b;
-            --accent-color: #7289da;
-            --text-color: #e0e0e0;
-            --border-radius: 12px;
+            --bg-dark: #0a0a0f;
+            --panel-bg: rgba(20, 20, 30, 0.8);
+            --accent: #8b5cf6;
+            --accent-glow: #6366f1;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Фон с частицами */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1033 0%, #0a0a0f 100%);
+        }
+
+        .wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            margin: 0;
+            min-height: 100vh;
+            padding: 40px 20px;
+            box-sizing: border-box;
         }
 
-        .container {
-            max-width: 600px;
+        .main-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
             width: 100%;
-            text-align: center;
+            max-width: 700px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        h1 { margin-bottom: 30px; color: #fff; }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 30px;
+            color: #fff;
+            text-transform: uppercase;
+        }
 
-        select, button {
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: var(--border-radius);
-            border: none;
-            margin: 10px;
-            outline: none;
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
         }
 
         select {
-            background: var(--card-bg);
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent);
             color: white;
+            padding: 12px;
+            border-radius: 10px;
+            outline: none;
             cursor: pointer;
-            width: 100%;
+            transition: 0.3s;
+        }
+
+        select:focus {
+            box-shadow: 0 0 10px var(--accent);
         }
 
         button {
-            background: var(--accent-color);
+            background: var(--accent);
             color: white;
-            font-weight: bold;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-            width: 100%;
+            transition: 0.3s;
         }
 
-        button:hover { opacity: 0.9; }
+        button:hover {
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
 
-        .info-card {
+        .info-container {
             display: none;
-            margin-top: 30px;
-            text-align: left;
-            animation: fadeIn 0.5s ease;
+            animation: slideUp 0.4s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .section {
-            background: var(--card-bg);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: var(--border-radius);
-            border-left: 4px solid var(--accent-color);
+        .info-header {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
         }
 
-        .section h3 {
-            margin-top: 0;
-            color: var(--accent-color);
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .grid-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
 
-        .server-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            column-count: 1;
+        .section-box {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
         }
 
-        @media (min-width: 450px) { .server-list { column-count: 2; } }
-
-        .server-list li {
-            padding: 3px 0;
-            font-size: 0.9rem;
-            color: #ccc;
+        .label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
         }
 
-        .difficulty {
+        .desc-text { line-height: 1.6; color: var(--text-main); }
+
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .server-item {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border-left: 2px solid var(--accent);
+        }
+
+        .diff-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--accent);
             font-weight: bold;
-            color: #ffcc00;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .controls { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🛡️ Anti-Cheat Base</h1>
-    
-    <select id="acSelector">
-        <option value="polar">Polar AC</option>
-        <option value="intave">Intave AC</option>
-        <option value="grim">Grim AC</option>
-        <option value="vulcan">Vulcan AC</option>
-        <option value="verus">Verus AC</option>
-        <option value="matrix">Matrix AC</option>
-        <option value="others">Другие AC</option>
-    </select>
+<canvas id="particles-canvas"></canvas>
 
-    <button onclick="showInfo()">Показать информацию</button>
-
-    <div id="infoDisplay" class="info-card">
-        <h2 id="acTitle" style="text-align: center; margin-bottom: 20px;"></h2>
+<div class="wrapper">
+    <div class="main-card">
+        <h1>Anti-Cheat Database</h1>
         
-        <div class="section">
-            <h3>📝 Описание</h3>
-            <p id="acDesc"></p>
+        <div class="controls">
+            <select id="acSelector">
+                <option value="polar">Polar AC</option>
+                <option value="intave">Intave AC</option>
+                <option value="grim">Grim AC</option>
+                <option value="vulcan">Vulcan AC</option>
+                <option value="verus">Verus AC</option>
+                <option value="matrix">Matrix AC</option>
+                <option value="others">Другие AC</option>
+            </select>
+            <button onclick="updateAC()">Показать информацию</button>
         </div>
 
-        <div class="section">
-            <h3>🌐 Используется на серверах</h3>
-            <ul id="acServers" class="server-list"></ul>
-        </div>
+        <div id="displayArea" class="info-container">
+            <div id="acTitle" class="info-header"></div>
+            
+            <div class="grid-info">
+                <div class="section-box">
+                    <span class="label">Описание</span>
+                    <div id="acDesc" class="desc-text"></div>
+                </div>
 
-        <div class="section">
-            <h3>⚡ Сложность обхода</h3>
-            <p id="acDiff" class="difficulty"></p>
+                <div class="section-box">
+                    <span class="label">Сложность обхода</span>
+                    <div id="acDiff" class="diff-badge"></div>
+                </div>
+
+                <div class="section-box">
+                    <span class="label">Используется на серверах</span>
+                    <div id="acServers" class="server-grid"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    // --- ДАННЫЕ ---
     const data = {
         polar: {
             title: "Polar AC",
-            desc: "Polar — один из сильнейших анти-читов с хорошими Combat и Movement чеками. Использует систему митигаций на основе траст-фактора, облачные технологии и ИИ.",
-            servers: ["mc.jartexnetwork.com", "mc.universocraft.com", "play.minemalia.com", "gommehd.net", "pika.host", "mc.masedworld.ru", "cheatmine.ru", "revage.net"],
-            diff: "Сложно"
+            desc: "Один из сильнейших анти-читов с продвинутыми проверками боя и передвижения. Система митигаций на базе траст-фактора корректирует урон и отбрасывание. Использует облачные вычисления и нейронные сети.",
+            diff: "Сложно",
+            servers: ["mc.jartexnetwork.com", "mc.universocraft.com", "play.minemalia.com", "gommehd.net", "pika.host", "mc.mineblaze.net", "dexland.ru", "revage.net"]
         },
         intave: {
             title: "Intave AC",
-            desc: "Некогда один из сильнейших АС с облачными проверками и системой митигации. Поддержка прекращается к концу 2025 года, облака отключат в 2026. Серверы переходят на Polar.",
-            servers: ["New: mc.agerapvp.club", "New: mc.fakepixel.fun", "Old: 3fmc.com", "Old: craftplay.pl"],
-            diff: "Средне / Сложно"
+            desc: "Был эталонным решением с облачными проверками и сложной системой митигации. Разработчики прекращают поддержку к концу 2025 года, облака отключат в 2026. Большинство серверов переходят на Polar.",
+            diff: "Средне / Сложно",
+            servers: ["mc.agerapvp.club", "mc.fakepixel.fun", "3fmc.com", "craftplay.pl", "mc.hypemc.pro"]
         },
         grim: {
             title: "Grim AC",
-            desc: "Популярный open-source анти-чит. Силен в Movement чеках (благодаря 1.19+ движку), но Combat чеки считаются довольно слабыми.",
-            servers: ["blocksmc.com", "play.pvplegacy.net", "mccisland.net", "hoplite.gg", "vimecorp.com"],
-            diff: "Средне"
+            desc: "Популярный проект с открытым исходным кодом. Известен отличными проверками передвижения, основанными на симуляции движка, однако боевые проверки считаются уязвимыми.",
+            diff: "Средне",
+            servers: ["blocksmc.com", "play.pvplegacy.net", "mccisland.net", "mc.zentic.cc", "hoplite.gg", "funnymc.su"]
         },
         vulcan: {
             title: "Vulcan AC",
-            desc: "Относительно слабый платный анти-чит. Обеспечивает только базовую защиту, имеет множество публичных обходов.",
-            servers: ["supercraft.fun", "mc.minelatino.com", "esta.land", "teamholy.de"],
-            diff: "Легко"
+            desc: "Доступный платный анти-чит. Предлагает базовый набор проверок, но имеет большое количество публичных обходов в популярных чит-клиентах.",
+            diff: "Легко",
+            servers: ["supercraft.fun", "mc.minelatino.com", "esta.land", "mc.remiaft.com", "rapy.pl", "teamholy.de"]
         },
         verus: {
             title: "Verus AC",
-            desc: "Устаревший и на сегодняшний день слабый анти-чит. Часто используется как второстепенный в паре с другими плагинами.",
-            servers: ["librecraft.com", "np.coldpvp.com", "heeph.club", "curve.rip"],
-            diff: "Легко"
+            desc: "Устаревший анти-чит с предсказуемыми алгоритмами. В современных условиях считается слабым, из-за чего часто используется только в связке с другими плагинами.",
+            diff: "Легко",
+            servers: ["librecraft.com", "np.coldpvp.com", "heeph.club", "curve.rip"]
         },
         matrix: {
             title: "Matrix AC",
-            desc: "Популярный бюджетный анти-чит для серверов с кастомными механиками (анархии, гриф). Дает лишь базовый уровень защиты.",
-            servers: ["mlegacy.net", "funnymc.ru", "mc.forscraft.net"],
-            diff: "Легко"
+            desc: "Бюджетное решение, оптимизированное под серверы с нестандартными механиками (анархия). Балансирует между производительностью и защитой, но легко обходится опытными пользователями.",
+            diff: "Легко",
+            servers: ["mlegacy.net", "funnymc.ru", "mc.forscraft.net"]
         },
         others: {
             title: "Другие AC",
-            desc: "Крупные серверы часто пишут свои решения (Sentinel на Cubecraft, Prediction на Hypixel) или комбинируют несколько плагинов сразу.",
-            servers: ["hypixel.net (Prediction)", "cubecraft.net (Sentinel)", "minemen.club (AGC)", "pvpdojo.com (NCP)"],
-            diff: "Зависит от сборки"
+            desc: "Крупные проекты предпочитают самописные решения. Sentinel (Cubecraft) и Prediction (Hypixel) — примеры закрытых систем, разработанных под конкретные задачи сервера.",
+            diff: "Разная",
+            servers: ["mc.163mc.cn (Spiter)", "play.cnbedwars.top (Tatako)", "hypixel.net (Prediction)", "minemen.club (AGC)", "pvpdojo.com (NCP)"]
         }
     };
 
-    function showInfo() {
-        const selected = document.getElementById('acSelector').value;
-        const info = data[selected];
-        
+    function updateAC() {
+        const val = document.getElementById('acSelector').value;
+        const info = data[val];
+        const area = document.getElementById('displayArea');
+
         document.getElementById('acTitle').innerText = info.title;
         document.getElementById('acDesc').innerText = info.desc;
         document.getElementById('acDiff').innerText = info.diff;
-        
-        const serverList = document.getElementById('acServers');
-        serverList.innerHTML = '';
-        info.servers.forEach(srv => {
-            let li = document.createElement('li');
-            li.innerText = '• ' + srv;
-            serverList.appendChild(li);
+
+        const srvGrid = document.getElementById('acServers');
+        srvGrid.innerHTML = '';
+        info.servers.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'server-item';
+            div.innerText = s;
+            srvGrid.appendChild(div);
         });
 
-        document.getElementById('infoDisplay').style.display = 'block';
+        area.style.display = 'block';
     }
+
+    // --- ФОНОВЫЕ ЧАСТИЦЫ ---
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = -10;
+            this.size = Math.random() * 3 + 1;
+            this.speed = Math.random() * 2 + 1;
+            this.history = [];
+            this.maxHistory = 15;
+            this.color = `rgba(139, 92, 246, ${Math.random() * 0.5 + 0.2})`;
+        }
+        update() {
+            this.history.push({x: this.x, y: this.y});
+            if(this.history.length > this.maxHistory) this.history.shift();
+            
+            this.y += this.speed;
+            if (this.y > canvas.height) this.reset();
+        }
+        draw() {
+            // Рисуем трейл
+            ctx.beginPath();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = this.size / 2;
+            for(let i = 0; i < this.history.length; i++) {
+                ctx.lineTo(this.history[i].x, this.history[i].y);
+            }
+            ctx.stroke();
+
+            // Рисуем голову (кружок)
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = "#fff";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = varGet('--accent');
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function varGet(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    for(let i = 0; i < 50; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    animate();
 </script>
 
 </body>
